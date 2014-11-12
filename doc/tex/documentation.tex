@@ -992,6 +992,8 @@ GPIO & 1110 & GPIO ID & GPIO State & No\\
 Ack & 1111 & Port ID & Ack Count & No\\
 Poll & 1010 & Port ID & Poll Count & No\\
 \textcolor{red}{Reset} & 0000 & Unused & Unused & No\\ %TODO Not implemented yet
+\textcolor{red}{ReqChecksum} & 0001 & Unused & Unused & No\\
+Checksum & 0010 & first & Unsed & No\
 Debug & 0111 & Severity & Payload Size & Yes
  \end{tabular}
 \caption{Overview of messages in protocol version 1}
@@ -1022,6 +1024,12 @@ Furthermore, GPIO components do only store their current state and perform no ca
 \paragraph{Reset Message}
 This message is not specified in the protocol above. A reset message sent by the host-side driver resets the state of the board-side driver, clearing all queues and setting the reset flag for all components. The board-side driver acknowledges a successful reset by answering with a reset message. 
 The target and size fields are unused by the reset message. \textcolor{red}{Reset messages are not implemented so far. The board requires a manual reset, sometimes even a full reboot.}
+
+\paragraph{ReqCheck Message}
+The host-side driver sends a request message to the board-side driver and asks the board-side driver to send its checksum. It is a 4 bit message. The bit encoding is shown in the Table 3.1. Host-side doesn't sends the data immediately. It waits and after getting the checksum matched, It sends the data to the board-side driver.
+
+\paragraph{Checksum Message}
+This message is sent by the board-side driver to the host-side driver in response to the checksum request.The Message is specified in the protocol. A keyword “first” is used as a message in the decode function. The function constructs the header of the message and decides the message type. According to the type of the message, it is passed to the switch statement. If the message is a checksum then it is compared with the host side checksum values. On successful comparison, connection continues otherwise, a error message “Host-side checksum and board-side checksum failed to match” is displayed on the console.
 
 \paragraph{Debug Message}
 This message also is not specified in the protocol. It marks a notification of some sort, sent by the board. This can be debug output of the driver running on the board, a warning message about skipped messages or an unhandled error, that occurred on the board. For these messages, the payload contains a string.
