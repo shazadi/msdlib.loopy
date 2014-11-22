@@ -1023,6 +1023,14 @@ Furthermore, GPIO components do only store their current state and perform no ca
 This message is not specified in the protocol above. A reset message sent by the host-side driver resets the state of the board-side driver, clearing all queues and setting the reset flag for all components. The board-side driver acknowledges a successful reset by answering with a reset message. 
 The target and size fields are unused by the reset message. \textcolor{red}{Reset messages are not implemented so far. The board requires a manual reset, sometimes even a full reboot.}
 
+\paragraph{ReqCheck Message}
+The host-side driver sends a request message to the board-side driver and asks the board-side driver to send its checksum. It is a 4 bit message. The bit encoding is shown in the Table 3.1. Host-side doesn't sends the data immediately. It waits and after getting the checksum matched, It sends the data to the board-side driver.
+
+\paragraph{Checksum Message}
+This message is sent by the board-side driver to the host-side driver in response to the checksum request.The Message is specified in the protocol.After sending the checksum request ,decode function is  called and it constructs the header of the message and decides the message type. According to the type of the message, it is passed to the switch statement.If the message is a checksum then it is compared with the host side checksum values.The checksum values are defined in the constant header file.
+ 
+On successful comparison,connection continues. The checksum matching shows that the board-side driver and the host-api are generated from the same description-file .Otherwise, a error message “Checksum of board-side driver and host-side api do not match” is displayed on the console. The error message is written in the protocol decode function and checksum_recvd returns the bool value for it. The checksum_rcvd value is accessed via proto->checksum_received function which is called in the check checksum function. If checksum doesn't match then checksum_received returns the checksum_rcvd false. After that exit call terminates the program. 
+
 \paragraph{Debug Message}
 This message also is not specified in the protocol. It marks a notification of some sort, sent by the board. This can be debug output of the driver running on the board, a warning message about skipped messages or an unhandled error, that occurred on the board. For these messages, the payload contains a string.
 The target bits are used to differentiate between the debug message type. The bit encoding is shown in \Cref{tab:protoDebug}. Values in between have been left unused for future use (e.g. finer grained warnings or info messages).
