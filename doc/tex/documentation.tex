@@ -1445,6 +1445,12 @@ The reading thread utilizes the \texttt{select} method defined in TCP, which wai
 \subsubsection{Communication medium}
 The communication medium is part of the I/O handler of the driver and wraps lower-level communication (essentially transport layer and below) between host and board driver. The communication medium abstracts from the actually used technology and provides a homogeneous api for the I/O threads. Network interface specific initialisation is generated as well and is not required by the user (other than annotating configuration details in the board description).
 
+\subsubsection{Checksum Implementation}
+Checksum implementation shows that the board-side driver and the host-api are generated from the same description-file The host-side and the board-side drivers have their own checksum values. Once the connection established, the host-side driver request for the board-side checksum by sending a checksum request. After sending a request, the host driver waits for the board-side checksum. The send checksum function gets the bool value for the checksum received. The value of this variable is returned by proto->checksum_received() called from the main-thread (through check_checksum()) and the reader-thread writes to this variable in protocol decode function.
+
+In the protocol decode a switch statement has checksum case where checksum of both sides compared. The checksum values of both drivers compared sequentially. First value of the host-side driver with the first board-side checksum values then second of both and so on. If one of them not matched checksum not matched. If checksum matched program keeps continue and “Your” function called from the main where values are read and write through an out-going AXI-stream port and in-going AXI-stream port respectively. Host-side reads the values through an out-going port from the board-side driver in the “Your” function. 
+
+
 Currently, three communication mediums are envisioned:
 \begin{itemize} \itemsep1pt \parskip0pt \parsep0pt
 \item \textbf{Ethernet Lite}, which is already implemented
